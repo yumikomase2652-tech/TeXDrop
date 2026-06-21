@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: texdrop-compiler
+    runtime: docker
+    dockerfilePath: ./services/compiler-api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: COMPILER_RUNTIME
+        value: native
+      - key: HOST
+        value: 0.0.0.0
+      - key: MAX_CONCURRENT
+        value: 2
+      - key: ALLOWED_ORIGINS
+        sync: false

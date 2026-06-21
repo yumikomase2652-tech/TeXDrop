@@ -1,0 +1,29 @@
+{
+  "name": "texdrop-local",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:api": "node --watch services/compiler-api/server.mjs",
+    "build": "next build",
+    "start": "next start",
+    "start:api": "node services/compiler-api/server.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "tex-image": "docker build -f services/compiler-api/Dockerfile.texlive -t latex-mvp-texlive:local services/compiler-api"
+  },
+  "dependencies": {
+    "next": "^15.5.19",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "eslint": "^9.30.0",
+    "eslint-config-next": "^15.5.19",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,7 @@
+*
+!services/
+services/*
+!services/compiler-api/
+services/compiler-api/*
+!services/compiler-api/server.mjs
+!services/compiler-api/Dockerfile

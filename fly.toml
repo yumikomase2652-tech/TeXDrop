@@ -1,0 +1,31 @@
+app = "texdrop-compiler-change-me"
+primary_region = "nrt"
+
+[build]
+  dockerfile = "services/compiler-api/Dockerfile"
+  build-target = ""
+
+[env]
+  HOST = "0.0.0.0"
+  PORT = "10000"
+  COMPILER_RUNTIME = "native"
+  MAX_CONCURRENT = "2"
+
+[http_service]
+  internal_port = 10000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  memory = "1gb"
+  cpus = 1
+  cpu_kind = "shared"

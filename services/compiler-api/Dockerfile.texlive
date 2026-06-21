@@ -1,0 +1,11 @@
+FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    latexmk texlive-luatex texlive-lang-japanese texlive-latex-extra \
+    texlive-fonts-recommended \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --uid 1000 --create-home compiler
+USER compiler
+WORKDIR /work

@@ -1,0 +1,8 @@
+node_modules
+.next
+.env*.local
+*.log
+*.tsbuildinfo
+.DS_Store
+.vercel
+services/compiler-api/tmp
