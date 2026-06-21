@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -11,6 +11,7 @@ const MAX_CONCURRENT = Number(process.env.MAX_CONCURRENT ?? 2);
 const TEX_IMAGE = process.env.TEX_IMAGE ?? "latex-mvp-texlive:local";
 const COMPILER_RUNTIME = process.env.COMPILER_RUNTIME ?? "docker";
 const WORK_ROOT = process.env.WORK_ROOT ?? tmpdir();
+const TEX_CACHE_SEED = process.env.TEX_CACHE_SEED;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "http://localhost:3000,http://127.0.0.1:3000")
   .split(",").map((origin) => origin.trim()).filter(Boolean);
 let activeJobs = 0;
@@ -100,6 +101,7 @@ async function runNative(workdir) {
   const texmfCache = join(workdir, "texmf-cache");
   const xdgCache = join(workdir, "xdg-cache");
   await Promise.all([texmfVar, texmfConfig, texmfCache, xdgCache].map((path) => mkdir(path, { recursive: true })));
+  if (TEX_CACHE_SEED) await cp(TEX_CACHE_SEED, texmfCache, { recursive: true });
 
   const compileEnv = {
     ...process.env,
@@ -110,8 +112,6 @@ async function runNative(workdir) {
     XDG_CACHE_HOME: xdgCache,
   };
   const options = { cwd: workdir, env: compileEnv };
-  const cacheCheck = await runProcess("luaotfload-tool", ["--cache=show"], options);
-  if (cacheCheck.code !== 0) return cacheCheck;
 
   return runProcess("latexmk", [
     "-lualatex",
