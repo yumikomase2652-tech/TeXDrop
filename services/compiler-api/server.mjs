@@ -7,7 +7,7 @@ import { join } from "node:path";
 const PORT = Number(process.env.PORT ?? 4000);
 const HOST = process.env.HOST ?? "127.0.0.1";
 const TIMEOUT_MS = 45_000;
-const MAX_CONCURRENT = Number(process.env.MAX_CONCURRENT ?? 2);
+const MAX_CONCURRENT = Number(process.env.MAX_CONCURRENT ?? 1);
 const TEX_IMAGE = process.env.TEX_IMAGE ?? "latex-mvp-texlive:local";
 const COMPILER_RUNTIME = process.env.COMPILER_RUNTIME ?? "docker";
 const WORK_ROOT = process.env.WORK_ROOT ?? tmpdir();
@@ -101,6 +101,9 @@ async function runNative(workdir) {
   const texmfCache = join(workdir, "texmf-cache");
   const xdgCache = join(workdir, "xdg-cache");
   await Promise.all([texmfVar, texmfConfig, texmfCache, xdgCache].map((path) => mkdir(path, { recursive: true })));
+  // luaotfload only searches its writable cache root for the names database.
+  // Seed that tiny database per job so it never performs a memory-heavy font
+  // rescan inside Render's 512 MB container.
   if (TEX_CACHE_SEED) await cp(TEX_CACHE_SEED, texmfCache, { recursive: true });
 
   const compileEnv = {
@@ -163,7 +166,13 @@ const server = createServer(async (req, res) => {
     return json(req, res, status, { ok: false, error: status === 400 ? "Invalid JSON" : "Internal compiler error", log: error instanceof Error ? error.message : "予期しないエラーが発生しました。" });
   } finally {
     activeJobs -= 1;
-    if (workdir) await rm(workdir, { recursive: true, force: true });
+    if (workdir) {
+      try {
+        await rm(workdir, { recursive: true, force: true });
+      } catch (error) {
+        console.error("Failed to remove compile directory", error);
+      }
+    }
   }
 });
 

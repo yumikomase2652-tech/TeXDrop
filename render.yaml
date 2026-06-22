@@ -11,6 +11,6 @@ services:
       - key: HOST
         value: 0.0.0.0
       - key: MAX_CONCURRENT
-        value: 2
+        value: 1
       - key: ALLOWED_ORIGINS
         sync: false
